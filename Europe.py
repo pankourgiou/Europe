@@ -61,9 +61,9 @@ class SymbolicInterpreter:
     
 # Example usage:
 code = """
-x := cold
-? x = cold € x cold
-∞ 10 € cold
+x := 30
+? x = 30 € x 30
+∞ 30 € cold
 def mimic € play
 mimic
 """
