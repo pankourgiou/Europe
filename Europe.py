@@ -63,7 +63,7 @@ class SymbolicInterpreter:
 code = """
 x := 30
 ? x = 30 € x 30
-∞ 30 € cold
+∞ 100 € Hahaha
 def mimic € play
 mimic
 """
