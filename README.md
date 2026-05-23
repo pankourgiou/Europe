@@ -1,4 +1,4 @@
-So, this is the interpreter for a programming language called Europe! It's bassed on python programming language and since it's still on it's first steps it does some very basic things.
+So, this is the interpreter for a programming language called Europe! It's bassed on .html programming language and since it's still on it's first steps it does some very basic things.
 For example:
 1)it prints messages using € symbol
 2)it uses if statements with ?
