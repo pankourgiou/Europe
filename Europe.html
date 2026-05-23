@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Symbolic Interpreter</title>
+
+<style>
+    body {
+        background: #111;
+        color: #eee;
+        font-family: monospace;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #00ff88;
+    }
+
+    textarea {
+        width: 100%;
+        height: 250px;
+        background: #1b1b1b;
+        color: #00ff88;
+        border: 1px solid #333;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 14px;
+        resize: vertical;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: #00ff88;
+        color: black;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+    #output {
+        margin-top: 20px;
+        background: #1b1b1b;
+        border: 1px solid #333;
+        padding: 10px;
+        min-height: 150px;
+        white-space: pre-wrap;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Symbolic Interpreter</h1>
+
+<textarea id="code">
+:= x 30
+? x = 30 € x is 30
+∞ 5 € 123
+def mimic € play
+mimic
+</textarea>
+
+<br>
+<button onclick="runInterpreter()">Run</button>
+
+<div id="output"></div>
+
+<script>
+class SymbolicInterpreter {
+    constructor(outputElement) {
+        this.variables = {};
+        this.functions = {};
+        this.outputElement = outputElement;
+
+        this.operators = {
+            "+": (a, b) => a + b,
+            "-": (a, b) => a - b,
+            "*": (a, b) => a * b,
+            "/": (a, b) => a / b
+        };
+    }
+
+    print(text) {
+        this.outputElement.textContent += text + "\n";
+    }
+
+    evaluateExpression(expr) {
+        let parts = expr.split(" ");
+
+        if (this.variables[parts[0]] !== undefined) {
+            parts[0] = this.variables[parts[0]];
+        }
+
+        if (this.variables[parts[2]] !== undefined) {
+            parts[2] = this.variables[parts[2]];
+        }
+
+        try {
+            let left = parseFloat(parts[0]);
+            let right = parseFloat(parts[2]);
+            let op = this.operators[parts[1]];
+
+            if (!op || isNaN(left) || isNaN(right)) {
+                return "Invalid expression";
+            }
+
+            return String(op(left, right));
+        } catch {
+            return "Invalid expression";
+        }
+    }
+
+    evaluateCondition(lhs, condition, rhs) {
+        lhs = parseFloat(lhs);
+        rhs = parseFloat(rhs);
+
+        switch (condition) {
+            case "=":
+                return lhs === rhs;
+            case "!=":
+                return lhs !== rhs;
+            case ">":
+                return lhs > rhs;
+            case "<":
+                return lhs < rhs;
+            case ">=":
+                return lhs >= rhs;
+            case "<=":
+                return lhs <= rhs;
+            default:
+                return false;
+        }
+    }
+
+    execute(code) {
+        let lines = code.split("\n");
+
+        for (let line of lines) {
+            line = line.trim();
+
+            if (!line) continue;
+
+            let parts = line.split(" ");
+            let command = parts[0];
+
+            // Print
+            if (command === "€") {
+                this.print(parts.slice(1).join(" "));
+            }
+
+            // Variable assignment
+            else if (command === ":=") {
+                let varName = parts[1];
+                let varValue = parts.slice(2).join(" ");
+
+                if (Object.keys(this.operators).some(op => varValue.includes(op))) {
+                    varValue = this.evaluateExpression(varValue);
+                }
+
+                this.variables[varName] = varValue;
+            }
+
+            // Loop
+            else if (command === "∞") {
+                let count = parseInt(parts[1]);
+                let loopCommand = parts.slice(2).join(" ");
+
+                if (!isNaN(count)) {
+                    for (let i = 0; i < count; i++) {
+                        this.execute(loopCommand);
+                    }
+                } else {
+                    this.print("Invalid loop count");
+                }
+            }
+
+            // If statement
+            else if (command === "?") {
+                let varName = parts[1];
+                let condition = parts[2];
+                let value = parts[3];
+                let action = parts.slice(4).join(" ");
+
+                if (
+                    this.variables[varName] !== undefined &&
+                    this.evaluateCondition(
+                        this.variables[varName],
+                        condition,
+                        value
+                    )
+                ) {
+                    this.execute(action);
+                }
+            }
+
+            // Function definition
+            else if (command === "def") {
+                let funcName = parts[1];
+                let funcBody = parts.slice(2).join(" ");
+
+                this.functions[funcName] = funcBody;
+            }
+
+            // Function execution
+            else if (this.functions[command]) {
+                this.execute(this.functions[command]);
+            }
+        }
+    }
+}
+
+function runInterpreter() {
+    const code = document.getElementById("code").value;
+    const output = document.getElementById("output");
+
+    output.textContent = "";
+
+    const interpreter = new SymbolicInterpreter(output);
+    interpreter.execute(code);
+}
+</script>
+
+</body>
+</html>
